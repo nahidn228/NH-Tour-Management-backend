@@ -11,7 +11,7 @@ export const globalErrorHandler = (
   next: NextFunction
 ) => {
   let statusCode = 500;
-  let message = `Something wnt wrong!! ${err.message}`;
+  let message = `Something went wrong!! ${err.message}`;
 
   if (err instanceof AppError) {
     statusCode = err.statusCode;
