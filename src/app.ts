@@ -3,6 +3,8 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import { router } from "./app/routes";
 
+import { globalErrorHandler } from "./app/middleware/globalErrorHandler";
+
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -14,5 +16,7 @@ app.get("/", (req: Request, res: Response) => {
     message: "Welcome to NH Tour Management System Backend",
   });
 });
+
+app.use(globalErrorHandler);
 
 export default app;
