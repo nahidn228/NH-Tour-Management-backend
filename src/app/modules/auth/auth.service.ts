@@ -11,7 +11,7 @@ const credentialsLogin = async (payload: Partial<IUser>) => {
   const isUserExist = await User.findOne({ email });
 
   if (!isUserExist) {
-    throw new AppError(httpStatus.BAD_REQUEST, "User Not Registerd");
+    throw new AppError(httpStatus.BAD_REQUEST, "User Not Registered");
   }
 
   const isPasswordMatch = await bcrypt.compare(
