@@ -19,17 +19,16 @@ export const checkAuth =
         accessToken,
         envVars.JWT_ACCESS_SECRET
       ) as JwtPayload;
-
-      // if (!verifiedToken) {
-      //   throw new AppError(httpStatus.BAD_REQUEST, "You are Not Authorized");
-      // }
-
       if (!authRoles.includes(verifiedToken.role)) {
         throw new AppError(
           httpStatus.BAD_REQUEST,
           "You are Not Permitted to View This Route"
         );
       }
+
+      //global type declaration
+      req.user = verifiedToken;
+
       // if ((verifiedToken as JwtPayload).role !== authRoles.includes) {
       //   throw new AppError(
       //     httpStatus.BAD_REQUEST,
