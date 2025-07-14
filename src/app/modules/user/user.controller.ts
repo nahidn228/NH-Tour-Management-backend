@@ -49,7 +49,7 @@ const updateUser = catchAsync(
     //   envVars.JWT_ACCESS_SECRET
     // ) as JwtPayload;
 
-    //global type assign (user)
+    //global type assign (user) req.user
     const verifiedToken = req.user;
 
     const payload = req.body;
