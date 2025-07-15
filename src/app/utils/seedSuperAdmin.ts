@@ -33,7 +33,7 @@ export const seedSuperAdmin = async () => {
       isVerified: true,
     };
 
-    const superAdmin = User.create(payload);
+    const superAdmin = await User.create(payload);
     console.log(superAdmin);
   } catch (err) {
     console.log(err);
