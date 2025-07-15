@@ -5,21 +5,24 @@ import catchAsync from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { AuthServices } from "./auth.service";
 import AppError from "../../errorHelper/AppError";
+import { setAuthCookie } from "../../utils/setCookie";
 
 const credentialsLogin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const loginInfo = await AuthServices.credentialsLogin(req.body);
 
-    res.cookie("accessToken", loginInfo.accessToken, {
-      httpOnly: true,
-      secure: false,
-    });
+    // res.cookie("accessToken", loginInfo.accessToken, {
+    //   httpOnly: true,
+    //   secure: false,
+    // });
 
-    //set refresh token in cookie
-    res.cookie("refreshToken", loginInfo.refreshToken, {
-      httpOnly: true,
-      secure: false,
-    });
+    // //set refresh token in cookie
+    // res.cookie("refreshToken", loginInfo.refreshToken, {
+    //   httpOnly: true,
+    //   secure: false,
+    // });
+
+    setAuthCookie(res, loginInfo);
 
     sendResponse(res, {
       success: true,
@@ -39,6 +42,13 @@ const getNewAccessToken = catchAsync(
     }
 
     const tokenInfo = await AuthServices.getNewAccessToken(refreshToken);
+
+    // res.cookie("accessToken", tokenInfo.accessToken, {
+    //   httpOnly: true,
+    //   secure: false,
+    // });
+
+    setAuthCookie(res, tokenInfo);
 
     sendResponse(res, {
       success: true,
