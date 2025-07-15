@@ -6,10 +6,12 @@ import { router } from "./app/routes";
 
 import { globalErrorHandler } from "./app/middleware/globalErrorHandler";
 import notFound from "./app/middleware/notFound";
+import cookieParser from "cookie-parser";
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use(cookieParser());
 
 app.use("/api/v1", router);
 
