@@ -4,6 +4,8 @@ import AppError from "../errorHelper/AppError";
 import { verifyToken } from "../utils/jwt";
 import { envVars } from "../config/env";
 import { JwtPayload } from "jsonwebtoken";
+import { User } from "../modules/user/user.model";
+import { IsActive } from "../modules/user/user.interface";
 
 export const checkAuth =
   (...authRoles: string[]) =>
@@ -19,12 +21,38 @@ export const checkAuth =
         accessToken,
         envVars.JWT_ACCESS_SECRET
       ) as JwtPayload;
-      if (!authRoles.includes(verifiedToken.role)) {
+     
+
+
+
+      const isUserExist = await User.findOne({ email: verifiedToken.email });
+
+  if (!isUserExist) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User doesn't exist");
+  }
+  if (
+    isUserExist.isActive === IsActive.BLOCKED ||
+    isUserExist.isActive === IsActive.INACTIVE
+  ) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `User is ${isUserExist.isActive}`
+    );
+  }
+  if (isUserExist.isDeleted) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User is Deleted");
+  }
+
+
+ if (!authRoles.includes(verifiedToken.role)) {
         throw new AppError(
           httpStatus.BAD_REQUEST,
           "You are Not Permitted to View This Route"
         );
       }
+
+
+
 
       //global type declaration
       req.user = verifiedToken;
