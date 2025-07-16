@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import httpStatus from "http-status";
 import { NextFunction, Request, Response } from "express";
@@ -9,10 +10,40 @@ import { setAuthCookie } from "../../utils/setCookie";
 import { createUserTokens } from "../../utils/userTokens";
 import { envVars } from "../../config/env";
 import { JwtPayload } from "jsonwebtoken";
+import passport from "passport";
 
 const credentialsLogin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const loginInfo = await AuthServices.credentialsLogin(req.body);
+    // const loginInfo = await AuthServices.credentialsLogin(req.body);
+
+    passport.authenticate("local", async (err: any, user: any, info: any) => {
+      if (err) {
+        return next(err);
+      }
+
+      if (!user) {
+        return new AppError(httpStatus.NOT_FOUND, info.message);
+      }
+
+      const userToken = await createUserTokens(user);
+
+      // delete user.toObject().password;
+
+      const { password: pass, ...rest } = user.toObject();
+
+      setAuthCookie(res, userToken);
+
+      sendResponse(res, {
+        success: true,
+        message: "User Logged In Successful",
+        statusCode: httpStatus.OK,
+        data: {
+          accessToken: userToken.accessToken,
+          refreshToken: userToken.refreshToken,
+          user: rest,
+        },
+      });
+    })(req, res, next);
 
     // res.cookie("accessToken", loginInfo.accessToken, {
     //   httpOnly: true,
@@ -24,15 +55,14 @@ const credentialsLogin = catchAsync(
     //   httpOnly: true,
     //   secure: false,
     // });
+    //  setAuthCookie(res, loginInfo);
 
-    setAuthCookie(res, loginInfo);
-
-    sendResponse(res, {
-      success: true,
-      message: "User Logged In Successful",
-      statusCode: httpStatus.OK,
-      data: loginInfo,
-    });
+    // sendResponse(res, {
+    //   success: true,
+    //   message: "User Logged In Successful",
+    //   statusCode: httpStatus.OK,
+    //   data: loginInfo,
+    // });
   }
 );
 
