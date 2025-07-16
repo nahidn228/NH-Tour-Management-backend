@@ -22,7 +22,7 @@ const credentialsLogin = catchAsync(
       }
 
       if (!user) {
-        return new AppError(httpStatus.NOT_FOUND, info.message);
+        return next(new AppError(httpStatus.NOT_FOUND, info.message));
       }
 
       const userToken = await createUserTokens(user);
