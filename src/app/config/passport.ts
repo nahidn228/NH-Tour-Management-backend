@@ -27,7 +27,7 @@ passport.use(
           return done(null, false, { message: "No email found" });
         }
 
-        let user = User.findOne({ email });
+        let user = await User.findOne({ email });
         if (!user) {
           user = await User.create({
             email,
@@ -58,3 +58,20 @@ passport.use(
 // Bridge == Google -> user db store -> token
 //Custom -> email , password, role : USER, name... -> registration -> DB -> 1 User create
 //Google -> req -> google -> successful : Jwt Token : Role , email -> DB - Store -> token - api access
+
+passport.serializeUser(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (user: any, done: (err: any, id?: unknown) => void) => {
+    done(null, user._id);
+  }
+);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+passport.deserializeUser(async (id: string, done: any) => {
+  try {
+    const user = User.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err);
+  }
+});
