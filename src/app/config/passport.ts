@@ -1,6 +1,4 @@
 import bcrypt from "bcryptjs";
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import passport from "passport";
 import {
   Strategy as GoogleStrategy,
@@ -20,12 +18,23 @@ passport.use(
       usernameField: "email",
       passwordField: "password",
     },
-    async (email: string, password: string, done: any) => {
+    async (email: string, password: string, done) => {
       try {
         const isUserExist = await User.findOne({ email });
 
         if (!isUserExist) {
           return done(null, false, { message: "User doesn't exist" });
+        }
+
+        const isGoogleAuthenticated = isUserExist.auths.some(
+          (providerObjects) => providerObjects.provider === "google"
+        );
+
+        if (isGoogleAuthenticated && !isUserExist.password) {
+          return done(null, false, {
+            message:
+              "You have authenticated through Google. So if you want to login with credentials, then at first login with google and set a password for your Gmail and then you can login with email and password.",
+          });
         }
 
         const isPasswordMatch = await bcrypt.compare(
@@ -37,8 +46,6 @@ passport.use(
           return done(null, false, { message: "Incorrect Password" });
         }
         return done(null, isUserExist);
-
-        
       } catch (error) {
         done(error);
       }
@@ -104,7 +111,7 @@ passport.serializeUser(
   }
 );
 
-passport.deserializeUser(async (id: string, done: any) => {
+passport.deserializeUser(async (id: string, done) => {
   try {
     const user = User.findById(id);
     done(null, user);
