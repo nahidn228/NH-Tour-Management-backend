@@ -1,3 +1,6 @@
+import bcrypt from "bcryptjs";
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import passport from "passport";
 import {
   Strategy as GoogleStrategy,
@@ -7,6 +10,41 @@ import {
 import { envVars } from "./env";
 import { User } from "../modules/user/user.model";
 import { Role } from "../modules/user/user.interface";
+import { Strategy as LocalStrategy } from "passport-local";
+
+// passport.use(new LocalStrategy({}, async () => {}));
+
+passport.use(
+  new LocalStrategy(
+    {
+      usernameField: "email",
+      passwordField: "password",
+    },
+    async (email: string, password: string, done: any) => {
+      try {
+        const isUserExist = await User.findOne({ email });
+
+        if (!isUserExist) {
+          return done(null, false, { message: "User doesn't exist" });
+        }
+
+        const isPasswordMatch = await bcrypt.compare(
+          password as string,
+          isUserExist.password as string
+        );
+
+        if (!isPasswordMatch) {
+          return done(null, false, { message: "Incorrect Password" });
+        }
+        return done(null, isUserExist);
+
+        
+      } catch (error) {
+        done(error);
+      }
+    }
+  )
+);
 
 passport.use(
   new GoogleStrategy(
@@ -66,7 +104,6 @@ passport.serializeUser(
   }
 );
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 passport.deserializeUser(async (id: string, done: any) => {
   try {
     const user = User.findById(id);
