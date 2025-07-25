@@ -10,6 +10,8 @@ export const globalErrorHandler = (
   res: Response,
   next: NextFunction
 ) => {
+  const errorSource: any = [];
+
   let statusCode = 500;
   let message = `Something went wrong!! ${err.message}`;
 
@@ -20,6 +22,16 @@ export const globalErrorHandler = (
   } else if (err.name === "CastError") {
     statusCode = 400;
     message = "Invalid MongoDB ObjectId, Please provide a valid id";
+  } else if (err.name === "ZodError") {
+    statusCode = 400;
+    message = "Zod Error";
+    console.log(err.issues);
+    err.issues.forEach((issue: any) => {
+      errorSource.push({
+        path: issue.path[issue.path.length - 1],
+        message: issue.message,
+      });
+    });
   } else if (err instanceof AppError) {
     statusCode = err.statusCode;
     message = err.message;
@@ -31,6 +43,7 @@ export const globalErrorHandler = (
   res.status(statusCode).json({
     success: false,
     message,
+    errorSource,
     err,
     stack: envVars.NODE_ENV === "development" ? err.stack : null,
   });
