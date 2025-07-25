@@ -13,8 +13,18 @@ export const globalErrorHandler = (
   let statusCode = 500;
   let message = `Something went wrong!! ${err.message}`;
 
-  if (err instanceof AppError) {
+  if (err.code === 11000) {
+    const matchedArray = err.message.match(/"([^"]*)"/);
+    statusCode = 400;
+    message = `${matchedArray[1]} already exist !!`;
+  } else if (err.name === "CastError") {
+    statusCode = 400;
+    message = "Invalid MongoDB ObjectId, Please provide a valid id";
+  } else if (err instanceof AppError) {
     statusCode = err.statusCode;
+    message = err.message;
+  } else if (err instanceof Error) {
+    statusCode = 500;
     message = err.message;
   }
 
