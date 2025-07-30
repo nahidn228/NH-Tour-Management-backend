@@ -127,7 +127,7 @@ const updateTour = async (id: string, payload: Partial<ITour>) => {
 
       let counter = 0;
       while (await Tour.exists({ slug })) {
-          slug = `${slug}-${counter++}` // dhaka-division-2
+          slug = `${slug}-${counter++}` 
       }
 
       payload.slug = slug
